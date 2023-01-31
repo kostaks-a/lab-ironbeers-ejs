@@ -1,21 +1,18 @@
-const { render } = require('ejs');
-const express = require('express');
-const expressLayouts = require('express-ejs-layouts');
-
-const path = require('path');
-const PunkAPIWrapper = require('punkapi-javascript-wrapper');
-
+const express = require("express");
 const app = express();
+const path = require("path");
+const expressLayouts = require("express-ejs-layouts"); 
+ 
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(express.static(path.join(__dirname, "public")));
+app.use(expressLayouts);
+
+const PunkAPIWrapper = require('punkapi-javascript-wrapper');
 const punkAPI = new PunkAPIWrapper();
 
 let allBeers
-
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-//app.use(expressLayouts);
-
-app.use(express.static(path.join(__dirname, 'public')));
-
+let randomBeer
 
 
 // Add the route handlers here:
@@ -35,10 +32,11 @@ app.get('/beers', async (req, res) => {
   }
 });
 
-app.get('/random-beer', (req, res) => {
+app.get('/random-beer', async (req, res) => {
   try{
-    //let randomBeer = allBeers[Math.floor(Math.random()*allBeers.length)]
-    //console.log("here is the beers", randomBeer);
+    allBeers = await punkAPI.getBeers();
+    randomBeer = allBeers[Math.floor(Math.random()*allBeers.length)]
+    console.log("random beer", randomBeer);
     res.render(__dirname + '/views/random-beer.ejs');
   }
   catch(error){
